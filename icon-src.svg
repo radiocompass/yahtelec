@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 576">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#040d1e"/>
+      <stop offset="100%" style="stop-color:#081526"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0%" y1="0%" x2="60%" y2="100%">
+      <stop offset="0%" style="stop-color:#5eead4"/>
+      <stop offset="100%" style="stop-color:#0d9488"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:0.35"/>
+      <stop offset="50%" style="stop-color:#2dd4bf;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#2dd4bf;stop-opacity:0.35"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow-soft">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="576" height="576" rx="120" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <line x1="0" y1="192" x2="576" y2="192" stroke="#2dd4bf" stroke-width="0.4" stroke-opacity="0.08"/>
+  <line x1="0" y1="384" x2="576" y2="384" stroke="#2dd4bf" stroke-width="0.4" stroke-opacity="0.08"/>
+  <line x1="192" y1="0" x2="192" y2="576" stroke="#2dd4bf" stroke-width="0.4" stroke-opacity="0.08"/>
+  <line x1="384" y1="0" x2="384" y2="576" stroke="#2dd4bf" stroke-width="0.4" stroke-opacity="0.08"/>
+
+  <!-- Wave at bottom -->
+  <path d="M0 430 Q72 400 144 430 Q216 460 288 430 Q360 400 432 430 Q504 460 576 430 L576 576 L0 576 Z"
+        fill="url(#wave)"/>
+
+  <!-- Lightning bolt — centre -->
+  <g filter="url(#glow)">
+    <polygon
+      points="320,100  200,310  280,310  256,476  376,266  296,266"
+      fill="url(#bolt)"
+      stroke="#99f6e4"
+      stroke-width="3"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <!-- Small stars / dots accent -->
+  <circle cx="140" cy="150" r="3" fill="#2dd4bf" opacity="0.5"/>
+  <circle cx="430" cy="130" r="2" fill="#2dd4bf" opacity="0.4"/>
+  <circle cx="460" cy="390" r="3" fill="#2dd4bf" opacity="0.3"/>
+  <circle cx="110" cy="400" r="2" fill="#f59e0b" opacity="0.5"/>
+
+  <!-- Border glow ring -->
+  <rect width="576" height="576" rx="120" fill="none"
+        stroke="#2dd4bf" stroke-width="2" stroke-opacity="0.18"/>
+</svg>

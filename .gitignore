@@ -12,3 +12,9 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Build tools (не нужны в репо)
+node_modules/
+package.json
+package-lock.json
+build-icons.js
