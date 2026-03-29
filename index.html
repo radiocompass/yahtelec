@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YachtElec — Электрика яхты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<style>
+:root {
+  --bg: #080f1e;
+  --bg2: #0b1525;
+  --bg3: #0f1f38;
+  --wave: #132840;
+  --teal: #2dd4bf;
+  --teal2: #14b8a6;
+  --sun: #f59e0b;
+  --sun2: #fbbf24;
+  --red: #ef4444;
+  --orange: #f97316;
+  --green: #22c55e;
+  --blue: #3b82f6;
+  --purple: #a78bfa;
+  --t1: #e8f4f8;
+  --t2: #94b8d0;
+  --t3: #4a6a80;
+  --border: rgba(45,212,191,.12);
+  --borderB: rgba(45,212,191,.35);
+  --card: rgba(11,21,37,.85);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Syne',sans-serif;
+  background:var(--bg);
+  color:var(--t1);
+  display:flex;
+  flex-direction:column;
+}
+/* BG */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 0%,rgba(19,60,100,.5) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 90%,rgba(8,20,40,.7) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+header{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:16px;
+  padding:10px 20px;
+  border-bottom:1px solid var(--border);
+  background:rgba(8,15,30,.9);
+  backdrop-filter:blur(12px);
+  position:relative;z-index:50;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo svg{width:34px;height:34px}
+.logo-name{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.logo-sub{font-family:'Crimson Pro',serif;font-style:italic;font-size:11px;color:var(--teal);opacity:.8;letter-spacing:.5px}
+.sys-bar{
+  display:flex;gap:3px;padding:3px;
+  background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:9px;
+  margin-left:12px;
+}
+.sysb{
+  padding:5px 14px;border-radius:6px;border:none;
+  background:transparent;color:var(--t3);
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;
+  cursor:pointer;transition:all .18s;letter-spacing:.3px;
+}
+.sysb.on{background:var(--teal);color:var(--bg);font-weight:700}
+.sysb:not(.on):hover{color:var(--teal)}
+.hstats{display:flex;gap:18px;margin-left:auto}
+.hstat{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.hstat .lb{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;font-family:'JetBrains Mono',monospace}
+.hstat .vl{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500}
+.vl.ok{color:var(--green)}.vl.warn{color:var(--orange)}.vl.bad{color:var(--red)}.vl.c{color:var(--teal)}
+
+/* ─── BODY LAYOUT ─────────────────────────────────────── */
+.app{
+  flex:1;display:grid;
+  grid-template-columns:270px 1fr 290px;
+  grid-template-rows:1fr;
+  gap:0;overflow:hidden;
+  position:relative;z-index:1;
+}
+
+/* ─── PANEL BASE ──────────────────────────────────────── */
+.panel{overflow-y:auto;height:100%}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:var(--t3);border-radius:2px}
+
+/* ─── LEFT PANEL ──────────────────────────────────────── */
+.left{border-right:1px solid var(--border);padding:12px}
+.sect{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:10px;overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.sect-hd{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none;
+}
+.sect-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sect-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t2)}
+.sect-arr{font-size:9px;color:var(--t3);margin-left:auto;transition:transform .2s}
+.sect-arr.o{transform:rotate(180deg)}
+.sect-bd{padding:10px 12px}
+.field{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.field:last-child{margin-bottom:0}
+.field label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.inp{
+  display:flex;align-items:center;
+  background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:7px;
+  overflow:hidden;transition:border-color .18s;
+}
+.inp:focus-within{border-color:var(--teal)}
+.inp input{
+  background:transparent;border:none;outline:none;
+  color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:12px;
+  padding:6px 8px;flex:1;min-width:0;
+}
+.inp .u{padding:0 8px 0 2px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)}
+select{
+  background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:7px;
+  color:var(--t1);font-family:'Syne',sans-serif;font-size:11px;
+  padding:6px 8px;outline:none;cursor:pointer;width:100%;-webkit-appearance:none;
+  transition:border-color .18s;
+}
+select:focus{border-color:var(--teal)}
+select option{background:var(--bg3)}
+.mini-box{
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(0,0,0,.25);border:1px solid var(--border);
+  border-radius:7px;padding:6px 10px;margin-top:6px;font-size:10px;
+}
+.mini-box .k{color:var(--t3)}
+.mini-box .v{font-family:'JetBrains Mono',monospace;color:var(--teal)}
+.wire-btn{
+  width:100%;margin-top:4px;padding:7px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--t2);border-radius:7px;
+  font-family:'Syne',sans-serif;font-size:10px;font-weight:700;
+  cursor:pointer;letter-spacing:.5px;transition:all .15s;text-transform:uppercase;
+}
+.wire-btn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ─── CENTER ──────────────────────────────────────────── */
+.center{
+  display:flex;flex-direction:column;gap:0;overflow:hidden;
+  border-right:1px solid var(--border);
+}
+
+/* Boat diagram */
+.boat-wrap{
+  flex-shrink:0;position:relative;
+  background:linear-gradient(180deg,rgba(5,12,25,.95) 0%,rgba(8,18,35,.9) 100%);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.boat-svg{width:100%;height:240px;display:block}
+
+/* Consumer table area */
+.table-area{flex:1;overflow-y:auto;overflow-x:hidden}
+.table-area::-webkit-scrollbar{width:3px}
+.table-area::-webkit-scrollbar-thumb{background:var(--t3);border-radius:2px}
+
+.tbl-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--border);
+  background:rgba(8,15,30,.9);position:sticky;top:0;z-index:10;
+}
+.tbl-title{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t2)}
+.cnt{background:var(--teal);color:var(--bg);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700}
+.add-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:7px;
+  border:1px solid var(--teal);background:transparent;color:var(--teal);
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer;
+  transition:all .18s;
+}
+.add-btn:hover{background:var(--teal);color:var(--bg)}
+
+.cat-tabs{
+  display:flex;gap:3px;padding:8px 12px 0;overflow-x:auto;
+  background:rgba(8,15,30,.8);border-bottom:1px solid var(--border);
+}
+.cat-tabs::-webkit-scrollbar{display:none}
+.ctab{
+  padding:5px 10px;border-radius:6px 6px 0 0;
+  border:1px solid transparent;border-bottom:none;
+  background:transparent;color:var(--t3);
+  font-family:'Syne',sans-serif;font-size:10px;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:all .12s;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.ctab.on{background:rgba(45,212,191,.07);border-color:var(--border);color:var(--teal)}
+.ctab:not(.on):hover{color:var(--t2)}
+
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{
+  padding:7px 8px;text-align:left;
+  font-size:8px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--t3);font-weight:600;border-bottom:1px solid var(--border);
+  white-space:nowrap;background:rgba(8,15,30,.7);position:sticky;top:0;
+}
+tbody tr{border-bottom:1px solid rgba(45,212,191,.04);transition:background .12s}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody td{padding:7px 8px;vertical-align:middle}
+.ni{
+  background:transparent;border:none;outline:none;
+  color:var(--t1);font-family:'Syne',sans-serif;font-size:11px;font-weight:500;
+  width:100%;border-bottom:1px solid transparent;transition:border-color .15s;
+}
+.ni:focus{border-bottom-color:var(--teal)}
+.ci{
+  background:rgba(0,0,0,.2);border:1px solid transparent;border-radius:4px;
+  outline:none;color:var(--t1);font-family:'JetBrains Mono',monospace;
+  font-size:11px;padding:3px 6px;width:60px;text-align:right;
+  transition:border-color .15s;
+}
+.ci:focus{border-color:var(--teal)}
+.cs{
+  background:rgba(0,0,0,.2);border:1px solid transparent;border-radius:4px;
+  outline:none;color:var(--t1);font-family:'Syne',sans-serif;font-size:10px;
+  padding:3px 5px;cursor:pointer;transition:border-color .15s;max-width:80px;
+}
+.cs:focus{border-color:var(--teal)}
+.cs option{background:var(--bg3)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);white-space:nowrap}
+.mono.hi{color:var(--orange)}.mono.cr{color:var(--red)}
+.toggle{
+  width:28px;height:16px;border-radius:8px;
+  background:rgba(0,0,0,.4);border:1px solid var(--border);
+  position:relative;cursor:pointer;transition:background .18s;flex-shrink:0;
+}
+.toggle.on{background:var(--teal);border-color:var(--teal)}
+.toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:10px;height:10px;background:white;border-radius:50%;transition:left .18s;
+}
+.toggle.on::after{left:14px}
+.delbtn{
+  background:transparent;border:none;color:var(--t3);
+  cursor:pointer;padding:3px 5px;border-radius:4px;font-size:12px;
+  transition:all .12s;
+}
+.delbtn:hover{background:rgba(239,68,68,.15);color:var(--red)}
+.fbadge{
+  display:inline-flex;
+  background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);
+  color:var(--sun);border-radius:4px;padding:1px 5px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+}
+.acb{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--sun);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;letter-spacing:.5px}
+.dcb{background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.3);color:var(--teal);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;letter-spacing:.5px}
+.pdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px}
+.pdot.essential{background:var(--red)}.pdot.important{background:var(--orange)}.pdot.comfort{background:var(--green)}
+
+.nodata{text-align:center;padding:32px 16px;color:var(--t3)}
+.nodata .ni2{font-size:30px;margin-bottom:8px}
+.nodata p{font-family:'Crimson Pro',serif;font-style:italic;font-size:13px}
+
+.totals-row{
+  padding:10px 16px;border-top:1px solid var(--border);
+  background:rgba(0,0,0,.25);
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+}
+.tr-item .tr-l{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:2px}
+.tr-item .tr-v{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--teal)}
+
+/* Presets bar */
+.presets{padding:8px 12px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;background:rgba(8,15,30,.6)}
+.preset-ttl{font-size:8px;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);width:100%;margin-bottom:2px;font-weight:600}
+.pbtn{
+  padding:3px 9px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--t3);font-family:'Syne',sans-serif;
+  font-size:9px;font-weight:600;cursor:pointer;transition:all .12s;
+}
+.pbtn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ─── RIGHT PANEL ─────────────────────────────────────── */
+.right{padding:10px 12px;overflow-y:auto}
+.right::-webkit-scrollbar{width:3px}
+.right::-webkit-scrollbar-thumb{background:var(--t3);border-radius:2px}
+
+.r-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;margin-bottom:10px;
+  backdrop-filter:blur(8px);
+}
+.r-hd{
+  padding:10px 12px;border-bottom:1px solid var(--border);
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t2);
+}
+.r-bd{padding:10px 12px}
+
+/* Results rows */
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;gap:8px}
+.rrow .rk{font-size:10px;color:var(--t2);flex:1}
+.rrow .rv{font-family:'JetBrains Mono',monospace;font-size:12px;white-space:nowrap}
+.rv.g{color:var(--green)}.rv.y{color:var(--orange)}.rv.r{color:var(--red)}.rv.c{color:var(--teal)}.rv.s{color:var(--sun)}
+
+/* Autonomy bars */
+.arow{display:flex;align-items:center;gap:6px;padding:3px 0}
+.al{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--t3);width:55px;flex-shrink:0}
+.abar{flex:1;height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden}
+.afill{height:100%;border-radius:3px;transition:width .5s}
+.av{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--t2);width:40px;text-align:right;flex-shrink:0}
+
+/* SOC gauge */
+.gbar{height:8px;background:rgba(0,0,0,.3);border-radius:4px;overflow:hidden;border:1px solid var(--border);margin:6px 0 3px}
+.gfill{height:100%;border-radius:4px;transition:width .5s,background .3s}
+.glabels{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3)}
+
+/* Warnings */
+.warn-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-bottom:1px solid var(--border);font-size:10px;line-height:1.4}
+.warn-item:last-child{border-bottom:none}
+.warn-item .wt{color:var(--t2);flex:1}
+.warn-item.error{background:rgba(239,68,68,.05)}
+.warn-item.warn{background:rgba(249,115,22,.05)}
+.warn-item.info{background:rgba(45,212,191,.03)}
+
+/* Flow SVG */
+.flow-wrap{padding:10px 12px}
+.flow-wrap svg{width:100%;height:auto}
+
+/* ─── MODAL ───────────────────────────────────────────── */
+.overlay{
+  position:fixed;inset:0;background:rgba(5,10,22,.85);
+  backdrop-filter:blur(4px);z-index:200;display:flex;
+  align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--bg3);border:1px solid var(--borderB);
+  border-radius:14px;padding:22px;max-width:480px;width:90%;
+  max-height:90vh;overflow-y:auto;
+  transform:translateY(16px);transition:transform .2s;
+}
+.overlay.open .modal{transform:translateY(0)}
+.modal-ttl{font-size:16px;font-weight:700;margin-bottom:16px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.mfield{display:flex;flex-direction:column;gap:4px}
+.mfield.full{grid-column:1/-1}
+.mfield label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-weight:600}
+.minput{
+  background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:7px;
+  outline:none;color:var(--t1);font-family:'JetBrains Mono',monospace;
+  font-size:13px;padding:7px 10px;width:100%;transition:border-color .18s;
+}
+.minput:focus{border-color:var(--teal)}
+.msel{
+  background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:7px;
+  outline:none;color:var(--t1);font-family:'Syne',sans-serif;
+  font-size:12px;padding:7px 10px;width:100%;cursor:pointer;
+}
+.msel option{background:var(--bg3)}
+.mbtns{display:flex;gap:8px;justify-content:flex-end}
+.mcancel{
+  padding:7px 16px;background:transparent;border:1px solid var(--border);
+  color:var(--t2);border-radius:7px;font-family:'Syne',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.mcancel:hover{border-color:var(--borderB)}
+.mconfirm{
+  padding:7px 20px;background:var(--teal);border:none;color:var(--bg);
+  border-radius:7px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .15s;
+}
+.mconfirm:hover{background:var(--teal2)}
+
+/* Wire modal */
+.w-res{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,0,0,.2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;margin-top:10px;
+}
+.w-res .wl{font-size:10px;color:var(--t3)}
+.w-res .wv{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--teal)}
+
+/* Boat node tooltip */
+.boat-tooltip{
+  position:absolute;
+  background:rgba(8,15,30,.96);border:1px solid var(--borderB);
+  border-radius:10px;padding:10px 14px;font-size:11px;
+  pointer-events:none;z-index:20;min-width:140px;
+  transition:opacity .15s;
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--t3);border-radius:2px}
+
+/* ─── MOBILE NAV (скрыто на десктопе) ─── */
+.mob-nav{display:none}
+.mob-hstats{display:none}
+
+/* ─── TABLET 769–1024px ───────────────────────────────────────────── */
+@media(min-width:769px) and (max-width:1024px){
+  .mob-nav{display:none}
+  .app{grid-template-columns:220px 1fr 250px}
+  .boat-svg{height:180px}
+  table{font-size:10px}
+  thead th{font-size:7px}
+  th:nth-child(9),td:nth-child(9){display:none}
+  .inp input,select{padding:8px !important;font-size:14px !important}
+}
+
+/* ─── PHONE ≤768px ────────────────────────────────────────────────── */
+@media(max-width:768px){
+  html,body{overflow:auto;height:auto}
+
+  .app{
+    display:block;overflow:visible;
+    padding-bottom:70px;
+  }
+  .panel.left,.center,.panel.right{
+    display:none;height:auto;overflow:visible;
+  }
+  .panel.left.mob-active,
+  .center.mob-active,
+  .panel.right.mob-active{display:block}
+
+  /* Компактная шапка */
+  header{flex-wrap:wrap;gap:8px;padding:8px 12px}
+  .hstats{display:none}
+  .logo-sub{display:none}
+
+  /* Нижний таббар */
+  .mob-nav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    height:60px;
+    background:rgba(8,15,30,.97);
+    border-top:1px solid var(--borderB);
+    backdrop-filter:blur(12px);
+    z-index:100;
+  }
+  .mnav-btn{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:2px;
+    background:transparent;border:none;
+    color:var(--t3);cursor:pointer;
+    font-family:'Syne',sans-serif;
+    transition:color .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mnav-btn.active{color:var(--teal)}
+  .mnav-ico{font-size:20px;line-height:1}
+  .mnav-lbl{font-size:10px;font-weight:600;letter-spacing:.3px}
+
+  /* Карточки статов в Results */
+  .mob-hstats{
+    display:grid !important;grid-template-columns:1fr 1fr;
+    gap:8px;padding:12px;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;margin:12px 12px 0;
+  }
+  .mob-hstats .hstat{align-items:flex-start}
+  .mob-hstats .hstat .vl{font-size:18px}
+
+  /* Touch-friendly inputs */
+  .inp input,select,.minput,.msel{
+    font-size:16px !important;
+    padding:10px !important;
+  }
+  .add-btn,.wire-btn,.mconfirm,.mcancel{
+    padding:10px 16px !important;font-size:13px !important;
+  }
+  .toggle{width:36px !important;height:22px !important}
+  .toggle::after{width:14px !important;height:14px !important;top:3px;left:3px}
+  .toggle.on::after{left:18px !important}
+  .delbtn{padding:6px 10px !important;font-size:15px !important}
+
+  /* Скрыть SVG яхты */
+  .boat-wrap{display:none}
+
+  /* Таблица → карточки */
+  #main-table thead{display:none}
+  #main-table tbody tr{
+    display:flex;flex-wrap:wrap;
+    padding:10px 12px;gap:6px;
+    border-bottom:1px solid var(--border);
+    align-items:center;
+  }
+  #main-table tbody td{
+    display:inline-flex;align-items:center;
+    padding:0;border:none;
+  }
+  #main-table tbody td:nth-child(2){flex:1 0 100%;font-size:13px;font-weight:600}
+  /* Скрыть Ач/д и Вт·ч/д */
+  #main-table tbody td:nth-child(8),
+  #main-table tbody td:nth-child(9){display:none}
+
+  /* Итоги — 2 колонки */
+  .totals-row{grid-template-columns:1fr 1fr}
+
+  /* Модальное окно — снизу */
+  .overlay{align-items:flex-end}
+  .modal{
+    max-width:100%;width:100%;
+    border-radius:14px 14px 0 0;
+    max-height:90vh;
+  }
+  .overlay.open .modal{transform:translateY(0)}
+
+  /* Левая панель — убрать border и добавить padding */
+  .panel.left{border-right:none;padding:8px}
+  .panel.right{padding:8px}
+
+  /* Категории в таблице — горизонтальный скролл */
+  .cat-tabs{padding:6px 8px 0;gap:4px}
+  .ctab{padding:6px 12px;font-size:11px}
+
+  /* Кнопка добавить */
+  .tbl-header{padding:8px 12px}
+
+  /* Таблица — убрать вложенный скролл */
+  .table-area{overflow:visible;height:auto}
+  .center{overflow:visible;height:auto}
+
+  /* Presets переносятся */
+  .presets{flex-wrap:wrap}
+  .pbtn{padding:6px 12px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- MODALS -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-ttl">Добавить потребитель</div>
+    <div class="mgrid">
+      <div class="mfield full">
+        <label>Название</label>
+        <input class="minput" id="m-name" placeholder="Навигационный огонь">
+      </div>
+      <div class="mfield">
+        <label>Категория</label>
+        <select class="msel" id="m-cat">
+          <option value="nav">🧭 Навигация</option>
+          <option value="lighting">💡 Освещение</option>
+          <option value="galley">🍳 Камбуз</option>
+          <option value="safety">🛡 Безопасность</option>
+          <option value="comm">📡 Связь</option>
+          <option value="propulsion">⚙️ Движение</option>
+          <option value="comfort">🛋 Комфорт</option>
+          <option value="anchor">⚓ Такелаж</option>
+          <option value="bilge">🚿 Трюм/насосы</option>
+          <option value="ac">⚡ AC 220В</option>
+        </select>
+      </div>
+      <div class="mfield">
+        <label>Приоритет</label>
+        <select class="msel" id="m-priority">
+          <option value="essential">🔴 Необходимое</option>
+          <option value="important">🟡 Важное</option>
+          <option value="comfort">🟢 Комфорт</option>
+        </select>
+      </div>
+      <div class="mfield">
+        <label>Мощность (Вт)</label>
+        <input class="minput" id="m-power" type="number" placeholder="25">
+      </div>
+      <div class="mfield">
+        <label>Напряжение</label>
+        <select class="msel" id="m-voltage">
+          <option value="12">12В DC</option>
+          <option value="24">24В DC</option>
+          <option value="220">220В AC</option>
+        </select>
+      </div>
+      <div class="mfield">
+        <label>Кол-во (шт)</label>
+        <input class="minput" id="m-qty" type="number" value="1">
+      </div>
+      <div class="mfield">
+        <label>Часов/сутки</label>
+        <input class="minput" id="m-hours" type="number" value="4" step="0.5">
+      </div>
+      <div class="mfield">
+        <label>Тип нагрузки</label>
+        <select class="msel" id="m-load">
+          <option value="resistive">Резистивная</option>
+          <option value="motor">Мотор/помпа</option>
+          <option value="led">LED</option>
+          <option value="inverter">Инвертор</option>
+          <option value="charger">Зарядное</option>
+        </select>
+      </div>
+    </div>
+    <div class="mbtns">
+      <button class="mcancel" onclick="closeModal()">Отмена</button>
+      <button class="mconfirm" onclick="confirmAdd()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="wireModal">
+  <div class="modal">
+    <div class="modal-ttl">🔌 Калькулятор кабеля</div>
+    <div class="mgrid">
+      <div class="mfield"><label>Ток (А)</label><input class="minput" id="w-I" type="number" placeholder="20"></div>
+      <div class="mfield"><label>Напряжение (В)</label><select class="msel" id="w-V"><option value="12">12В</option><option value="24">24В</option><option value="220">220В</option></select></div>
+      <div class="mfield"><label>Длина (м, одна сторона)</label><input class="minput" id="w-L" type="number" placeholder="5"></div>
+      <div class="mfield"><label>Доп. падение (%)</label><select class="msel" id="w-drop"><option value="3">3% DC</option><option value="5">5% стандарт</option><option value="10">10% AC</option></select></div>
+    </div>
+    <div id="wire-res" style="display:none">
+      <div class="w-res">
+        <div><div class="wl">Минимальное сечение</div><div class="wv" id="wr-mm">—</div></div>
+        <div style="text-align:right"><div class="wl">Предохранитель</div><div class="fbadge" id="wr-fuse">—</div></div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--t3);line-height:1.5" id="wr-note"></div>
+    </div>
+    <div class="mbtns" style="margin-top:14px">
+      <button class="mcancel" onclick="document.getElementById('wireModal').classList.remove('open')">Закрыть</button>
+      <button class="mconfirm" onclick="calcWire()">Рассчитать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Boat node tooltip -->
+<div class="boat-tooltip" id="boat-tip" style="opacity:0;position:fixed;top:0;left:0">
+  <div id="tip-title" style="font-weight:700;margin-bottom:6px;color:var(--teal)"></div>
+  <div id="tip-body"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="17" r="16" stroke="#2dd4bf" stroke-width="1" opacity=".3"/>
+      <path d="M17 4 L17 24" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+      <path d="M8 18 L26 18" stroke="#2dd4bf" stroke-width=".8" opacity=".5"/>
+      <path d="M17 24 L7 30 L27 30 Z" fill="none" stroke="#2dd4bf" stroke-width="1.2"/>
+      <circle cx="17" cy="4" r="2.5" fill="#f59e0b"/>
+    </svg>
+    <div>
+      <div class="logo-name">YachtElec</div>
+      <div class="logo-sub">Marine Electrical Calculator</div>
+    </div>
+  </div>
+  <div class="sys-bar">
+    <button class="sysb on" onclick="setSys(12,this)">12В</button>
+    <button class="sysb" onclick="setSys(24,this)">24В</button>
+    <button class="sysb" onclick="setSys(48,this)">48В</button>
+  </div>
+  <div class="hstats">
+    <div class="hstat"><span class="lb">DC нагрузка</span><span class="vl c" id="h-dc">0 А</span></div>
+    <div class="hstat"><span class="lb">AC нагрузка</span><span class="vl c" id="h-ac">0 Вт</span></div>
+    <div class="hstat"><span class="lb">Автономия</span><span class="vl ok" id="h-auto">— ч</span></div>
+    <button style="background:transparent;border:1px solid var(--border);color:var(--t2);border-radius:7px;padding:5px 10px;font-family:'Syne',sans-serif;font-size:10px;cursor:pointer;font-weight:600;letter-spacing:.5px" onclick="window.print()">🖨 Отчёт</button>
+  </div>
+</header>
+
+<div class="app">
+<!-- ──── LEFT ──────────────────────────────────────────── -->
+<div class="panel left">
+
+  <div class="sect">
+    <div class="sect-hd" onclick="togSect(this)">
+      <div class="sect-ico" style="background:rgba(34,197,94,.12)">🔋</div>
+      <span class="sect-ttl">Аккумуляторы</span>
+      <span class="sect-arr o">▼</span>
+    </div>
+    <div class="sect-bd">
+      <div class="field"><label>Тип АКБ</label>
+        <select id="bat-type" onchange="recalc()">
+          <option value="gel">GEL (разряд до 50%)</option>
+          <option value="agm">AGM (разряд до 50%)</option>
+          <option value="lifepo4">LiFePO4 (разряд до 80%)</option>
+          <option value="wet">Обслуживаемый (50%)</option>
+        </select>
+      </div>
+      <div class="field"><label>Ёмкость одного АКБ (Ач)</label>
+        <div class="inp"><input type="number" id="bat-cap" value="100" oninput="recalc()"><span class="u">Ач</span></div>
+      </div>
+      <div class="field"><label>Параллельно (шт)</label>
+        <div class="inp"><input type="number" id="bat-qty" value="2" min="1" oninput="recalc()"><span class="u">шт</span></div>
+      </div>
+      <div class="field"><label>Последовательно (шт)</label>
+        <div class="inp"><input type="number" id="bat-series" value="1" min="1" oninput="recalc()"><span class="u">шт</span></div>
+      </div>
+      <div class="mini-box"><span class="k">Общая ёмкость</span><span class="v" id="bat-total">200 Ач</span></div>
+      <div class="mini-box"><span class="k">Доступная</span><span class="v" id="bat-usable" style="color:var(--green)">100 Ач</span></div>
+      <div class="mini-box"><span class="k">Напряжение системы</span><span class="v" style="color:var(--sun)" id="bat-sv">12 В</span></div>
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="sect-hd" onclick="togSect(this)">
+      <div class="sect-ico" style="background:rgba(245,158,11,.12)">☀️</div>
+      <span class="sect-ttl">Солнечные панели</span>
+      <span class="sect-arr o">▼</span>
+    </div>
+    <div class="sect-bd">
+      <div class="field"><label>Мощность панели (Вт)</label>
+        <div class="inp"><input type="number" id="sol-w" value="200" oninput="recalc()"><span class="u">Вт</span></div>
+      </div>
+      <div class="field"><label>Количество</label>
+        <div class="inp"><input type="number" id="sol-n" value="2" min="0" oninput="recalc()"><span class="u">шт</span></div>
+      </div>
+      <div class="field"><label>Часов солнца/день</label>
+        <div class="inp"><input type="number" id="sol-h" value="5" step=".5" oninput="recalc()"><span class="u">ч</span></div>
+      </div>
+      <div class="field"><label>Контроллер</label>
+        <select id="sol-mppt" onchange="recalc()">
+          <option value=".97">MPPT (97%)</option>
+          <option value=".75">PWM (75%)</option>
+          <option value=".92">MPPT с тенью (92%)</option>
+        </select>
+      </div>
+      <div class="mini-box"><span class="k">Генерация/день</span><span class="v" style="color:var(--sun)" id="sol-gen">—</span></div>
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="sect-hd" onclick="togSect(this)">
+      <div class="sect-ico" style="background:rgba(249,115,22,.12)">⚙️</div>
+      <span class="sect-ttl">Генератор / Берег</span>
+      <span class="sect-arr o">▼</span>
+    </div>
+    <div class="sect-bd">
+      <div class="field"><label>Генератор (кВА)</label>
+        <div class="inp"><input type="number" id="gen-kva" value="3.5" step=".5" oninput="recalc()"><span class="u">кВА</span></div>
+      </div>
+      <div class="field"><label>Работает (ч/день)</label>
+        <div class="inp"><input type="number" id="gen-h" value="2" step=".5" oninput="recalc()"><span class="u">ч</span></div>
+      </div>
+      <div class="field"><label>КПД зарядки</label>
+        <select id="gen-eff" onchange="recalc()">
+          <option value=".85">85% стандарт</option>
+          <option value=".92">92% MPPT</option>
+          <option value=".75">75% простой</option>
+        </select>
+      </div>
+      <div style="border-top:1px solid var(--border);margin:8px 0;padding-top:8px">
+        <div class="field"><label>Береговой ток (А)</label>
+          <div class="inp"><input type="number" id="shore-a" value="16" oninput="recalc()"><span class="u">А</span></div>
+        </div>
+      </div>
+      <div class="mini-box"><span class="k">Зарядка от генер./день</span><span class="v" style="color:var(--orange)" id="gen-ch">—</span></div>
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="sect-hd" onclick="togSect(this)">
+      <div class="sect-ico" style="background:rgba(96,165,250,.12)">🌬️</div>
+      <span class="sect-ttl">Ветрогенератор</span>
+      <span class="sect-arr">▼</span>
+    </div>
+    <div class="sect-bd" style="display:none">
+      <div class="field"><label>Мощность ном. (Вт)</label>
+        <div class="inp"><input type="number" id="wind-w" value="300" oninput="recalc()"><span class="u">Вт</span></div>
+      </div>
+      <div class="field"><label>Средняя скорость ветра</label>
+        <select id="wind-sp" onchange="recalc()">
+          <option value=".1">Слабый < 3 м/с</option>
+          <option value=".3" selected>Умеренный 3–6 м/с</option>
+          <option value=".6">Сильный 6–10 м/с</option>
+          <option value=".85">Шторм > 10 м/с</option>
+        </select>
+      </div>
+      <div class="mini-box"><span class="k">Генерация/день</span><span class="v" style="color:#60a5fa" id="wind-gen">—</span></div>
+    </div>
+  </div>
+
+  <button class="wire-btn" onclick="document.getElementById('wireModal').classList.add('open')">🔌 Калькулятор кабеля и предохранителей</button>
+
+</div>
+
+<!-- ──── CENTER ────────────────────────────────────────── -->
+<div class="center">
+
+  <!-- BOAT DIAGRAM -->
+  <div class="boat-wrap">
+    <svg class="boat-svg" id="boat-svg" viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg">
+      <!-- Water -->
+      <defs>
+        <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0a2040" stop-opacity=".9"/>
+          <stop offset="100%" stop-color="#050f1e" stop-opacity="1"/>
+        </linearGradient>
+        <linearGradient id="hullG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1a3a5c"/>
+          <stop offset="100%" stop-color="#0d2038"/>
+        </linearGradient>
+        <linearGradient id="sailG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="rgba(255,255,255,.08)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,.02)"/>
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow2">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="rgba(45,212,191,.6)"/>
+        </marker>
+        <marker id="arrow-sun" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="rgba(245,158,11,.6)"/>
+        </marker>
+        <marker id="arrow-gen" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="rgba(249,115,22,.5)"/>
+        </marker>
+      </defs>
+
+      <!-- Water surface -->
+      <rect x="0" y="175" width="800" height="65" fill="url(#waterG)"/>
+      <!-- Wave lines -->
+      <path d="M0 178 Q100 175 200 178 Q300 181 400 178 Q500 175 600 178 Q700 181 800 178" fill="none" stroke="rgba(45,212,191,.08)" stroke-width="1"/>
+      <path d="M0 183 Q80 180 160 183 Q240 186 320 183 Q400 180 480 183 Q560 186 640 183 Q720 180 800 183" fill="none" stroke="rgba(45,212,191,.05)" stroke-width="1"/>
+
+      <!-- HULL -->
+      <path d="M120 170 L140 185 L650 185 L680 170 Z" fill="url(#hullG)" stroke="rgba(45,212,191,.3)" stroke-width="1"/>
+      <!-- Hull interior -->
+      <rect x="140" y="140" width="510" height="35" rx="4" fill="rgba(13,30,56,.8)" stroke="rgba(45,212,191,.15)" stroke-width=".8"/>
+      <!-- Deck -->
+      <rect x="155" y="130" width="490" height="14" rx="3" fill="rgba(18,40,70,.9)" stroke="rgba(45,212,191,.25)" stroke-width="1"/>
+      <!-- Cockpit -->
+      <rect x="540" y="115" width="90" height="20" rx="4" fill="rgba(10,22,45,.9)" stroke="rgba(45,212,191,.2)" stroke-width=".8"/>
+      <text x="585" y="128" text-anchor="middle" fill="rgba(148,184,208,.4)" font-size="7" font-family="'JetBrains Mono',monospace">COCKPIT</text>
+
+      <!-- BOW -->
+      <path d="M155 130 L120 170" fill="none" stroke="rgba(45,212,191,.3)" stroke-width="1.2"/>
+      <!-- STERN -->
+      <path d="M645 130 L680 170" fill="none" stroke="rgba(45,212,191,.3)" stroke-width="1.2"/>
+
+      <!-- MAST -->
+      <line x1="380" y1="12" x2="380" y2="132" stroke="rgba(200,220,240,.5)" stroke-width="2"/>
+      <!-- Boom -->
+      <line x1="380" y1="105" x2="500" y2="132" stroke="rgba(200,220,240,.35)" stroke-width="1.5"/>
+      <!-- Stays -->
+      <line x1="380" y1="12" x2="155" y2="132" stroke="rgba(200,220,240,.15)" stroke-width=".8" stroke-dasharray="4,3"/>
+      <line x1="380" y1="12" x2="645" y2="132" stroke="rgba(200,220,240,.15)" stroke-width=".8" stroke-dasharray="4,3"/>
+
+      <!-- MAINSAIL -->
+      <path d="M382 18 L382 130 L500 130 Z" fill="url(#sailG)" stroke="rgba(200,220,240,.2)" stroke-width=".8"/>
+      <!-- JIB -->
+      <path d="M378 30 L158 130 L378 130 Z" fill="url(#sailG)" stroke="rgba(200,220,240,.15)" stroke-width=".8"/>
+
+      <!-- SOLAR PANELS (on deck, forward) -->
+      <g id="node-solar" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('solar')" onmouseenter="showTip(event,'solar')" onmouseleave="hideTip()">
+        <rect x="200" y="121" width="60" height="10" rx="2" fill="rgba(245,158,11,.25)" stroke="rgba(245,158,11,.6)" stroke-width="1"/>
+        <rect x="205" y="122" width="14" height="8" rx="1" fill="rgba(245,158,11,.15)" stroke="rgba(245,158,11,.4)" stroke-width=".5"/>
+        <rect x="221" y="122" width="14" height="8" rx="1" fill="rgba(245,158,11,.15)" stroke="rgba(245,158,11,.4)" stroke-width=".5"/>
+        <rect x="237" y="122" width="14" height="8" rx="1" fill="rgba(245,158,11,.15)" stroke="rgba(245,158,11,.4)" stroke-width=".5"/>
+        <text x="230" y="118" text-anchor="middle" fill="rgba(245,158,11,.9)" font-size="7" font-family="'JetBrains Mono',monospace">☀️ SOLAR</text>
+        <!-- Sun rays -->
+        <circle cx="230" cy="88" r="8" fill="rgba(245,158,11,.12)" stroke="rgba(245,158,11,.3)" stroke-width=".8" filter="url(#glow)"/>
+        <text x="230" y="92" text-anchor="middle" fill="rgba(245,158,11,.8)" font-size="9">☀</text>
+        <!-- Energy flow arrow down to solar panel -->
+        <line x1="230" y1="97" x2="230" y2="118" stroke="rgba(245,158,11,.5)" stroke-width="1" marker-end="url(#arrow-sun)" stroke-dasharray="3,2"/>
+      </g>
+
+      <!-- WIND GENERATOR (mast top) -->
+      <g id="node-wind" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('wind')" onmouseenter="showTip(event,'wind')" onmouseleave="hideTip()">
+        <circle cx="380" cy="12" r="7" fill="rgba(96,165,250,.15)" stroke="rgba(96,165,250,.5)" stroke-width="1" filter="url(#glow)"/>
+        <text x="380" y="16" text-anchor="middle" fill="rgba(96,165,250,.9)" font-size="9">🌬</text>
+        <text x="408" y="16" fill="rgba(96,165,250,.7)" font-size="7" font-family="'JetBrains Mono',monospace">WIND GEN</text>
+      </g>
+
+      <!-- GENERATOR (stern, engine room) -->
+      <g id="node-gen" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('gen')" onmouseenter="showTip(event,'gen')" onmouseleave="hideTip()">
+        <rect x="620" y="145" width="40" height="22" rx="4" fill="rgba(249,115,22,.12)" stroke="rgba(249,115,22,.45)" stroke-width="1"/>
+        <text x="640" y="156" text-anchor="middle" fill="rgba(249,115,22,.9)" font-size="8">⚙️</text>
+        <text x="640" y="164" text-anchor="middle" fill="rgba(249,115,22,.7)" font-size="6" font-family="'JetBrains Mono',monospace">ГЕНЕР.</text>
+      </g>
+
+      <!-- BATTERY BANK (center bilge) -->
+      <g id="node-bat" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('bat')" onmouseenter="showTip(event,'bat')" onmouseleave="hideTip()">
+        <rect x="340" y="145" width="80" height="28" rx="6" fill="rgba(34,197,94,.1)" stroke="rgba(34,197,94,.5)" stroke-width="1.2" filter="url(#glow)"/>
+        <!-- Battery cells -->
+        <rect x="344" y="149" width="16" height="18" rx="2" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.3)" stroke-width=".8"/>
+        <rect x="362" y="149" width="16" height="18" rx="2" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.3)" stroke-width=".8"/>
+        <rect x="380" y="149" width="16" height="18" rx="2" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.3)" stroke-width=".8"/>
+        <rect x="398" y="149" width="16" height="18" rx="2" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.3)" stroke-width=".8"/>
+        <text x="380" y="183" text-anchor="middle" fill="rgba(34,197,94,.8)" font-size="7" font-family="'JetBrains Mono',monospace">🔋 АКБ</text>
+        <text x="380" y="192" text-anchor="middle" fill="rgba(34,197,94,.6)" font-size="6" font-family="'JetBrains Mono',monospace" id="bat-node-txt">200 Ач / 12В</text>
+      </g>
+
+      <!-- DISTRIBUTION PANEL (nav station) -->
+      <g id="node-panel" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('panel')" onmouseenter="showTip(event,'panel')" onmouseleave="hideTip()">
+        <rect x="460" y="133" width="50" height="30" rx="4" fill="rgba(45,212,191,.08)" stroke="rgba(45,212,191,.4)" stroke-width="1"/>
+        <!-- Circuit breakers visualization -->
+        <rect x="463" y="136" width="8" height="8" rx="1" fill="rgba(45,212,191,.3)"/>
+        <rect x="473" y="136" width="8" height="8" rx="1" fill="rgba(45,212,191,.3)"/>
+        <rect x="483" y="136" width="8" height="8" rx="1" fill="rgba(45,212,191,.15)"/>
+        <rect x="493" y="136" width="8" height="8" rx="1" fill="rgba(34,197,94,.3)"/>
+        <rect x="463" y="146" width="8" height="8" rx="1" fill="rgba(245,158,11,.3)"/>
+        <rect x="473" y="146" width="8" height="8" rx="1" fill="rgba(45,212,191,.15)"/>
+        <rect x="483" y="146" width="8" height="8" rx="1" fill="rgba(45,212,191,.3)"/>
+        <rect x="493" y="146" width="8" height="8" rx="1" fill="rgba(45,212,191,.15)"/>
+        <text x="485" y="170" text-anchor="middle" fill="rgba(45,212,191,.8)" font-size="6" font-family="'JetBrains Mono',monospace">ЩИТОК</text>
+      </g>
+
+      <!-- NAV STATION (instruments) -->
+      <g id="node-nav" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('nav')" onmouseenter="showTip(event,'nav')" onmouseleave="hideTip()">
+        <rect x="560" y="133" width="38" height="28" rx="4" fill="rgba(59,130,246,.08)" stroke="rgba(59,130,246,.35)" stroke-width=".8"/>
+        <text x="579" y="145" text-anchor="middle" fill="rgba(59,130,246,.8)" font-size="9">🧭</text>
+        <text x="579" y="156" text-anchor="middle" fill="rgba(59,130,246,.6)" font-size="6" font-family="'JetBrains Mono',monospace">НАВ.</text>
+      </g>
+
+      <!-- GALLEY (forward of cockpit) -->
+      <g id="node-galley" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('galley')" onmouseenter="showTip(event,'galley')" onmouseleave="hideTip()">
+        <rect x="290" y="133" width="38" height="28" rx="4" fill="rgba(167,139,250,.08)" stroke="rgba(167,139,250,.3)" stroke-width=".8"/>
+        <text x="309" y="145" text-anchor="middle" fill="rgba(167,139,250,.8)" font-size="9">🍳</text>
+        <text x="309" y="156" text-anchor="middle" fill="rgba(167,139,250,.6)" font-size="6" font-family="'JetBrains Mono',monospace">КАМБУЗ</text>
+      </g>
+
+      <!-- BOW THRUSTER -->
+      <g id="node-bow" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('bow')" onmouseenter="showTip(event,'bow')" onmouseleave="hideTip()">
+        <circle cx="165" cy="160" r="12" fill="rgba(249,115,22,.08)" stroke="rgba(249,115,22,.3)" stroke-width=".8"/>
+        <text x="165" y="163" text-anchor="middle" fill="rgba(249,115,22,.8)" font-size="9">⚙</text>
+        <text x="165" y="196" text-anchor="middle" fill="rgba(249,115,22,.5)" font-size="6" font-family="'JetBrains Mono',monospace">БОУ-ТРА.</text>
+      </g>
+
+      <!-- SHORE POWER (transom) -->
+      <g id="node-shore" class="boat-node" style="cursor:pointer" onclick="boatNodeClick('shore')" onmouseenter="showTip(event,'shore')" onmouseleave="hideTip()">
+        <rect x="658" y="148" width="22" height="18" rx="3" fill="rgba(167,139,250,.1)" stroke="rgba(167,139,250,.4)" stroke-width=".8"/>
+        <text x="669" y="159" text-anchor="middle" fill="rgba(167,139,250,.8)" font-size="9">🔌</text>
+        <text x="669" y="175" text-anchor="middle" fill="rgba(167,139,250,.5)" font-size="6" font-family="'JetBrains Mono',monospace">БЕРЕГ</text>
+      </g>
+
+      <!-- LIGHTING nodes -->
+      <g id="node-light" class="boat-node" style="cursor:pointer" onmouseenter="showTip(event,'light')" onmouseleave="hideTip()">
+        <!-- Masthead light -->
+        <circle cx="380" cy="24" r="3" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width=".8" filter="url(#glow)"/>
+        <!-- Bow light -->
+        <circle cx="140" cy="152" r="3.5" fill="rgba(239,68,68,.3)" stroke="rgba(239,68,68,.7)" stroke-width=".8" filter="url(#glow)"/>
+        <circle cx="148" cy="152" r="3.5" fill="rgba(34,197,94,.3)" stroke="rgba(34,197,94,.7)" stroke-width=".8" filter="url(#glow)"/>
+        <!-- Stern light -->
+        <circle cx="672" cy="162" r="3.5" fill="rgba(255,255,255,.3)" stroke="rgba(255,255,255,.6)" stroke-width=".8" filter="url(#glow)"/>
+      </g>
+
+      <!-- BILGE PUMP -->
+      <g id="node-bilge" class="boat-node" style="cursor:pointer" onmouseenter="showTip(event,'bilge')" onmouseleave="hideTip()">
+        <circle cx="480" cy="168" r="5" fill="rgba(59,130,246,.15)" stroke="rgba(59,130,246,.4)" stroke-width=".8"/>
+        <text x="480" y="171" text-anchor="middle" fill="rgba(59,130,246,.8)" font-size="6">💧</text>
+      </g>
+
+      <!-- ENERGY FLOW LINES -->
+      <!-- Solar → Battery -->
+      <line id="fl-solar" x1="230" y1="131" x2="340" y2="157" stroke="rgba(245,158,11,.0)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-sun)"/>
+      <!-- Wind → Battery -->
+      <line id="fl-wind" x1="380" y1="20" x2="363" y2="145" stroke="rgba(96,165,250,.0)" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <!-- Gen → Battery -->
+      <line id="fl-gen" x1="620" y1="158" x2="420" y2="162" stroke="rgba(249,115,22,.0)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-gen)"/>
+      <!-- Shore → Battery -->
+      <line id="fl-shore" x1="658" y1="158" x2="420" y2="162" stroke="rgba(167,139,250,.0)" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <!-- Battery → Panel -->
+      <line id="fl-bat-panel" x1="420" y1="158" x2="460" y2="152" stroke="rgba(45,212,191,.35)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+      <!-- Panel → Nav -->
+      <line id="fl-nav" x1="510" y1="148" x2="560" y2="147" stroke="rgba(59,130,246,.25)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+      <!-- Panel → Galley -->
+      <line id="fl-galley" x1="460" y1="152" x2="328" y2="148" stroke="rgba(167,139,250,.25)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+      <!-- Panel → Lighting -->
+      <line id="fl-light" x1="465" y1="133" x2="390" y2="24" stroke="rgba(255,255,255,.12)" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <!-- SOC indicator on battery -->
+      <rect x="342" y="147" width="76" height="4" rx="2" fill="rgba(0,0,0,.4)"/>
+      <rect id="bat-soc-bar" x="342" y="147" width="50" height="4" rx="2" fill="rgba(34,197,94,.7)"/>
+
+      <!-- Compass rose (decorative) -->
+      <g transform="translate(50,50)" opacity=".15">
+        <circle cx="0" cy="0" r="18" fill="none" stroke="rgba(45,212,191,.4)" stroke-width=".8"/>
+        <line x1="0" y1="-18" x2="0" y2="18" stroke="rgba(45,212,191,.4)" stroke-width=".8"/>
+        <line x1="-18" y1="0" x2="18" y2="0" stroke="rgba(45,212,191,.4)" stroke-width=".8"/>
+        <text y="-20" text-anchor="middle" fill="rgba(45,212,191,.8)" font-size="8">N</text>
+      </g>
+
+      <!-- Labels -->
+      <text x="14" y="220" fill="rgba(45,212,191,.25)" font-size="7" font-family="'JetBrains Mono',monospace">YachtElec v2.0 · Marine Electrical Calculator</text>
+    </svg>
+
+    <!-- SOC label on boat -->
+    <div style="position:absolute;bottom:6px;right:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);opacity:.7" id="boat-soc-label">АКБ: —%</div>
+  </div>
+
+  <!-- TABLE AREA -->
+  <div class="table-area">
+    <div class="tbl-header">
+      <div class="tbl-title">⚡ Потребители <span class="cnt" id="con-cnt">0</span></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="acb">AC</span><span class="dcb">DC</span>
+        <button class="add-btn" onclick="openModal()">+ Добавить</button>
+      </div>
+    </div>
+
+    <div class="cat-tabs" id="cat-tabs">
+      <button class="ctab on" data-cat="all" onclick="filterCat(this)">Все</button>
+      <button class="ctab" data-cat="nav" onclick="filterCat(this)">🧭 Навигация</button>
+      <button class="ctab" data-cat="lighting" onclick="filterCat(this)">💡 Освещение</button>
+      <button class="ctab" data-cat="galley" onclick="filterCat(this)">🍳 Камбуз</button>
+      <button class="ctab" data-cat="safety" onclick="filterCat(this)">🛡 Безопасность</button>
+      <button class="ctab" data-cat="comm" onclick="filterCat(this)">📡 Связь</button>
+      <button class="ctab" data-cat="comfort" onclick="filterCat(this)">🛋 Комфорт</button>
+      <button class="ctab" data-cat="propulsion" onclick="filterCat(this)">⚙️ Движение</button>
+      <button class="ctab" data-cat="anchor" onclick="filterCat(this)">⚓ Такелаж</button>
+      <button class="ctab" data-cat="bilge" onclick="filterCat(this)">🚿 Трюм</button>
+      <button class="ctab" data-cat="ac" onclick="filterCat(this)">⚡ AC 220В</button>
+    </div>
+
+    <div id="no-data" class="nodata"><div class="ni2">⚡</div><p>Добавьте потребители для расчёта</p><br><button class="add-btn" onclick="openModal()" style="margin:0 auto">+ Добавить первый</button></div>
+
+    <table id="main-table" style="display:none">
+      <thead>
+        <tr>
+          <th style="width:26px"></th>
+          <th>Потребитель</th>
+          <th>Вт</th>
+          <th>В</th>
+          <th>Шт</th>
+          <th>ч/д</th>
+          <th>А пик</th>
+          <th>Ач/д</th>
+          <th>Вт·ч/д</th>
+          <th>Предохр.</th>
+          <th>Приор.</th>
+          <th style="width:26px"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <div id="totals" style="display:none" class="totals-row">
+      <div class="tr-item"><div class="tr-l">DC ток (ср.)</div><div class="tr-v" id="tot-a">0 А</div></div>
+      <div class="tr-item"><div class="tr-l">DC Ач/сутки</div><div class="tr-v" id="tot-ah">0 Ач</div></div>
+      <div class="tr-item"><div class="tr-l">AC Вт·ч/сут</div><div class="tr-v" id="tot-acwh" style="color:var(--sun)">0 Вт·ч</div></div>
+      <div class="tr-item"><div class="tr-l">Всего Вт·ч</div><div class="tr-v" id="tot-wh">0 Вт·ч</div></div>
+    </div>
+
+    <div class="presets">
+      <div class="preset-ttl">⚡ Быстрое добавление:</div>
+      <div id="presets-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ──── RIGHT ─────────────────────────────────────────── -->
+<div class="panel right">
+
+  <!-- Мобильные статы (скрыты на десктопе) -->
+  <div class="mob-hstats">
+    <div class="hstat"><span class="lb">DC нагрузка</span><span class="vl c" id="h-dc-m">0 А</span></div>
+    <div class="hstat"><span class="lb">AC нагрузка</span><span class="vl c" id="h-ac-m">0 Вт</span></div>
+    <div class="hstat"><span class="lb">Автономия</span><span class="vl ok" id="h-auto-m">— ч</span></div>
+    <div class="hstat"><span class="lb">Система</span><span class="vl s" id="h-sys-m">12В</span></div>
+  </div>
+
+  <!-- Energy balance -->
+  <div class="r-card">
+    <div class="r-hd">⚡ Энергобаланс</div>
+    <div class="flow-wrap">
+      <svg viewBox="0 0 265 188" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+        <rect x="2" y="8" width="55" height="32" rx="6" fill="rgba(245,158,11,.1)" stroke="rgba(245,158,11,.35)" stroke-width="1"/>
+        <text x="29" y="21" text-anchor="middle" fill="#f59e0b" font-size="8" font-family="'JetBrains Mono',monospace">☀️ Солнце</text>
+        <text x="29" y="33" text-anchor="middle" fill="#f59e0b" font-size="9" font-family="'JetBrains Mono',monospace" id="fs-solar">0 Ач</text>
+
+        <rect x="2" y="52" width="55" height="32" rx="6" fill="rgba(96,165,250,.08)" stroke="rgba(96,165,250,.25)" stroke-width="1"/>
+        <text x="29" y="65" text-anchor="middle" fill="#60a5fa" font-size="8" font-family="'JetBrains Mono',monospace">🌬️ Ветер</text>
+        <text x="29" y="77" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="'JetBrains Mono',monospace" id="fs-wind">0 Ач</text>
+
+        <rect x="2" y="96" width="55" height="32" rx="6" fill="rgba(249,115,22,.08)" stroke="rgba(249,115,22,.25)" stroke-width="1"/>
+        <text x="29" y="109" text-anchor="middle" fill="#f97316" font-size="8" font-family="'JetBrains Mono',monospace">⚙️ Генер.</text>
+        <text x="29" y="121" text-anchor="middle" fill="#f97316" font-size="9" font-family="'JetBrains Mono',monospace" id="fs-gen">0 Ач</text>
+
+        <rect x="2" y="140" width="55" height="32" rx="6" fill="rgba(167,139,250,.08)" stroke="rgba(167,139,250,.25)" stroke-width="1"/>
+        <text x="29" y="153" text-anchor="middle" fill="#a78bfa" font-size="8" font-family="'JetBrains Mono',monospace">🔌 Берег</text>
+        <text x="29" y="165" text-anchor="middle" fill="#a78bfa" font-size="9" font-family="'JetBrains Mono',monospace" id="fs-shore">0 Ач</text>
+
+        <line x1="57" y1="24" x2="95" y2="88" stroke="rgba(245,158,11,.4)" stroke-width="1.2" stroke-dasharray="3,2"/>
+        <line x1="57" y1="68" x2="95" y2="90" stroke="rgba(96,165,250,.4)" stroke-width="1.2" stroke-dasharray="3,2"/>
+        <line x1="57" y1="112" x2="95" y2="93" stroke="rgba(249,115,22,.4)" stroke-width="1.2" stroke-dasharray="3,2"/>
+        <line x1="57" y1="156" x2="95" y2="96" stroke="rgba(167,139,250,.4)" stroke-width="1.2" stroke-dasharray="3,2"/>
+
+        <rect x="90" y="66" width="75" height="50" rx="8" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.4)" stroke-width="1.2"/>
+        <text x="127" y="84" text-anchor="middle" fill="#22c55e" font-size="10" font-family="'JetBrains Mono',monospace">🔋 АКБ</text>
+        <text x="127" y="98" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="bold" font-family="'JetBrains Mono',monospace" id="fs-bat">200 Ач</text>
+        <text x="127" y="109" text-anchor="middle" fill="#22c55e" font-size="8" font-family="'JetBrains Mono',monospace" id="fs-batv">12 В</text>
+
+        <line x1="165" y1="91" x2="200" y2="91" stroke="rgba(45,212,191,.4)" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+
+        <rect x="200" y="66" width="60" height="50" rx="8" fill="rgba(45,212,191,.06)" stroke="rgba(45,212,191,.3)" stroke-width="1.2"/>
+        <text x="230" y="84" text-anchor="middle" fill="#2dd4bf" font-size="8" font-family="'JetBrains Mono',monospace">Нагрузка</text>
+        <text x="230" y="98" text-anchor="middle" fill="#2dd4bf" font-size="11" font-weight="bold" font-family="'JetBrains Mono',monospace" id="fs-load-a">0 А</text>
+        <text x="230" y="108" text-anchor="middle" fill="#2dd4bf" font-size="8" font-family="'JetBrains Mono',monospace" id="fs-load-w">0 Вт</text>
+
+        <text x="127" y="150" text-anchor="middle" font-size="8" font-family="'JetBrains Mono',monospace" fill="rgba(148,184,208,.5)">Баланс/день:</text>
+        <text x="127" y="163" text-anchor="middle" font-size="10" font-family="'JetBrains Mono',monospace" id="fs-bal">0 Ач</text>
+
+        <defs>
+          <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="rgba(45,212,191,.6)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Autonomy -->
+  <div class="r-card">
+    <div class="r-hd">⏱ Автономия (DC)</div>
+    <div class="r-bd">
+      <div class="arow"><span class="al">Необх.</span><div class="abar"><div class="afill" id="bar-e" style="width:0%;background:var(--red)"></div></div><span class="av" id="av-e">—</span></div>
+      <div class="arow"><span class="al">Важное</span><div class="abar"><div class="afill" id="bar-i" style="width:0%;background:var(--orange)"></div></div><span class="av" id="av-i">—</span></div>
+      <div class="arow"><span class="al">Комфорт</span><div class="abar"><div class="afill" id="bar-c" style="width:0%;background:var(--green)"></div></div><span class="av" id="av-c">—</span></div>
+    </div>
+  </div>
+
+  <!-- Balance & SOC -->
+  <div class="r-card">
+    <div class="r-hd">🔋 Зарядка / SOC</div>
+    <div class="r-bd">
+      <div class="rrow"><span class="rk">Расход DC/день</span><span class="rv c" id="r-dc">0 Ач</span></div>
+      <div class="rrow"><span class="rk">Зарядка всего/день</span><span class="rv g" id="r-ch">0 Ач</span></div>
+      <div class="rrow"><span class="rk">Суточный баланс</span><span class="rv" id="r-bal">0 Ач</span></div>
+      <div class="rrow"><span class="rk">SOC (после 24ч)</span><span class="rv" id="r-soc">—</span></div>
+      <div class="gbar"><div class="gfill" id="soc-fill" style="width:0%"></div></div>
+      <div class="glabels"><span>0%</span><span>50%</span><span>100%</span></div>
+    </div>
+  </div>
+
+  <!-- AC & Inverter -->
+  <div class="r-card">
+    <div class="r-hd">⚡ AC 220В / Инвертор</div>
+    <div class="r-bd">
+      <div class="rrow"><span class="rk">Мощность AC</span><span class="rv s" id="r-acw">0 Вт</span></div>
+      <div class="rrow"><span class="rk">AC Вт·ч/день</span><span class="rv s" id="r-acwh">0 Вт·ч</span></div>
+      <div class="rrow"><span class="rk">Инвертор (мин)</span><span class="rv" id="r-inv">—</span></div>
+    </div>
+  </div>
+
+  <!-- Cables -->
+  <div class="r-card">
+    <div class="r-hd">🔌 Главные кабели</div>
+    <div class="r-bd">
+      <div class="rrow"><span class="rk">Пиковый ток DC</span><span class="rv" id="r-peak">0 А</span></div>
+      <div class="rrow"><span class="rk">Кабель от АКБ</span><span class="rv c" id="r-cable">—</span></div>
+      <div class="rrow"><span class="rk">Главный предохр.</span><span class="fbadge" id="r-fuse" style="font-size:11px">—</span></div>
+    </div>
+  </div>
+
+  <!-- Warnings -->
+  <div class="r-card" id="warns-card" style="display:none">
+    <div class="r-hd">⚠ Рекомендации</div>
+    <div id="warns-list"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── VK BRIDGE INIT ─────────────────────────────────────────────────
+if (window.vkBridge) {
+  vkBridge.send('VKWebAppInit');
+}
+
+let SYS = 12;
+let consumers = [];
+let catFilter = 'all';
+let idCnt = 0;
+
+// ── BOAT TOOLTIPS ──────────────────────────────────────────────────
+const boatNodeInfo = {
+  solar: { title:'☀️ Солнечные панели', desc:()=>{
+    const w = (+I('sol-w')||0)*(+I('sol-n')||0);
+    const h = (+I('sol-h')||0);
+    const e = parseFloat(I('sol-mppt').value)||.97;
+    const ahd = (w*h*e/SYS).toFixed(0);
+    return `Мощность: <b>${w} Вт</b><br>Генерация/день: <b style="color:var(--sun)">${ahd} Ач</b><br>MPPT эффективность: ${(e*100).toFixed(0)}%`;
+  }},
+  wind: { title:'🌬️ Ветрогенератор', desc:()=>{
+    const w = +I('wind-w')||0;
+    const f = parseFloat(I('wind-sp').value)||.3;
+    const ahd = (w*f*24/SYS).toFixed(0);
+    return `Мощность ном.: <b>${w} Вт</b><br>Генерация/день: <b style="color:#60a5fa">${ahd} Ач</b>`;
+  }},
+  bat: { title:'🔋 Аккумуляторная банка', desc:()=>{
+    const cap = (+I('bat-cap')||0)*(+I('bat-qty')||1);
+    const sv = SYS*(+I('bat-series')||1);
+    const dep = {gel:.5,agm:.5,lifepo4:.8,wet:.5}[I('bat-type').value]||.5;
+    return `Общая ёмкость: <b>${cap} Ач</b><br>Доступная: <b style="color:var(--green)">${(cap*dep).toFixed(0)} Ач</b><br>Напряжение: <b style="color:var(--sun)">${sv}В</b>`;
+  }},
+  gen: { title:'⚙️ Генератор', desc:()=>{
+    const kva = +I('gen-kva')||0;
+    const h = +I('gen-h')||0;
+    const e = parseFloat(I('gen-eff').value)||.85;
+    const ahd = (kva*1000*h*e/SYS).toFixed(0);
+    return `Мощность: <b>${kva} кВА</b><br>Работа: <b>${h} ч/день</b><br>Зарядка: <b style="color:var(--orange)">${ahd} Ач/день</b>`;
+  }},
+  shore: { title:'🔌 Береговое питание', desc:()=>{
+    const a = +I('shore-a')||0;
+    return `Ток: <b>${a} А</b><br>Мощность: <b>${(a*220).toFixed(0)} Вт</b><br>Зарядный ток: <b style="color:var(--purple)">${(a*.85).toFixed(0)} А DC</b>`;
+  }},
+  panel: { title:'🔧 Распределительный щиток', desc:()=>{
+    const total = consumers.filter(c=>c.active&&c.v!==220).reduce((s,c)=>s+c.power*c.qty/c.v,0);
+    return `Суммарный ток: <b>${total.toFixed(1)} А</b><br>Потребителей: <b>${consumers.filter(c=>c.active).length}</b><br>Линий DC: <b>${consumers.filter(c=>c.active&&c.v!==220).length}</b>`;
+  }},
+  nav: { title:'🧭 Навигационная станция', desc:()=>{
+    const navCons = consumers.filter(c=>c.active&&c.cat==='nav');
+    const w = navCons.reduce((s,c)=>s+c.power*c.qty,0);
+    return `Потребителей: <b>${navCons.length}</b><br>Мощность: <b>${w} Вт</b><br>Плоттер, AIS, VHF, Эхолот`;
+  }},
+  galley: { title:'🍳 Камбуз', desc:()=>{
+    const gc = consumers.filter(c=>c.active&&c.cat==='galley');
+    const w = gc.reduce((s,c)=>s+c.power*c.qty,0);
+    return `Потребителей: <b>${gc.length}</b><br>Мощность: <b>${w} Вт</b><br>Холодильник, помпа, плита`;
+  }},
+  light: { title:'💡 Навигационные огни', desc:()=>{
+    const lc = consumers.filter(c=>c.active&&c.cat==='lighting');
+    const w = lc.reduce((s,c)=>s+c.power*c.qty,0);
+    return `Потребителей: <b>${lc.length}</b><br>Мощность: <b>${w} Вт</b><br>Красный/зелёный борт, корма, мачта`;
+  }},
+  bilge: { title:'💧 Трюмная помпа', desc:()=>{
+    const bc = consumers.filter(c=>c.active&&c.cat==='bilge');
+    return `Трюмных помп: <b>${bc.length}</b><br>Критически важный элемент безопасности`;
+  }},
+  bow: { title:'⚙️ Носовой подруливатель', desc:()=>{
+    const bc = consumers.filter(c=>c.active&&c.cat==='propulsion');
+    const w = bc.reduce((s,c)=>s+c.power*c.qty,0);
+    return `Потребителей: <b>${bc.length}</b><br>Пиковая мощность: <b>${w} Вт</b>`;
+  }},
+};
+
+function showTip(e, key) {
+  const info = boatNodeInfo[key];
+  if (!info) return;
+  const tip = document.getElementById('boat-tip');
+  document.getElementById('tip-title').textContent = info.title;
+  document.getElementById('tip-body').innerHTML = info.desc();
+  tip.style.opacity = '1';
+  moveTip(e);
+}
+function hideTip() {
+  document.getElementById('boat-tip').style.opacity = '0';
+}
+function moveTip(e) {
+  const tip = document.getElementById('boat-tip');
+  const x = e.clientX + 12, y = e.clientY - 40;
+  tip.style.left = Math.min(x, window.innerWidth-160) + 'px';
+  tip.style.top = Math.max(y, 60) + 'px';
+}
+document.addEventListener('mousemove', e => {
+  const tip = document.getElementById('boat-tip');
+  if (tip.style.opacity === '1') moveTip(e);
+});
+
+function boatNodeClick(key) {
+  const catMap = {nav:'nav',galley:'galley',solar:null,wind:null,bat:null,gen:null,shore:null,panel:null};
+  if (catMap[key] !== undefined && catMap[key] !== null) {
+    const tab = document.querySelector(`.ctab[data-cat="${catMap[key]}"]`);
+    if (tab) filterCat(tab);
+  }
+}
+
+// ── HELPERS ─────────────────────────────────────────────────────────
+function I(id) { return document.getElementById(id); }
+function togSect(hd) {
+  const bd = hd.nextElementSibling;
+  const arr = hd.querySelector('.sect-arr');
+  bd.style.display = bd.style.display==='none' ? '' : 'none';
+  arr.classList.toggle('o', bd.style.display!=='none');
+}
+function fuse(a) { return [5,10,15,20,25,30,40,50,60,80,100,125,150,200,250,300,400].find(f=>f>=a*1.1)||400; }
+function cable(a) {
+  if(a<=10) return '1.5 мм²';if(a<=20) return '2.5 мм²';if(a<=32) return '4 мм²';
+  if(a<=50) return '6 мм²';if(a<=65) return '10 мм²';if(a<=90) return '16 мм²';
+  if(a<=120) return '25 мм²';if(a<=160) return '35 мм²';if(a<=200) return '50 мм²';
+  if(a<=250) return '70 мм²';return '95+ мм²';
+}
+function invSize(w) { return [300,500,700,1000,1500,2000,3000,4000,5000].find(s=>s>=w*1.3)||6000; }
+function fmtH(h) { return h===Infinity?'∞':(h>999?'999+':h.toFixed(1))+'ч'; }
+function barP(h) { return h===Infinity?100:Math.min(100,h/120*100); }
+
+// ── SYSTEM VOLTAGE ──────────────────────────────────────────────────
+function setSys(v, btn) {
+  SYS = v;
+  document.querySelectorAll('.sysb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  I('m-voltage').innerHTML = `<option value="${v}">${v}В DC</option><option value="220">220В AC</option>`;
+  recalc();
+}
+
+// ── MODAL ───────────────────────────────────────────────────────────
+function openModal() { I('addModal').classList.add('open'); I('m-name').focus(); }
+function closeModal() { I('addModal').classList.remove('open'); }
+function confirmAdd() {
+  const name = I('m-name').value.trim()||'Потребитель';
+  addCon({name, cat:I('m-cat').value, priority:I('m-priority').value,
+    power:+I('m-power').value||0, v:+I('m-voltage').value, qty:+I('m-qty').value||1,
+    hours:+I('m-hours').value||0, load:I('m-load').value});
+  closeModal();
+  ['m-name','m-power'].forEach(id=>I(id).value='');
+  I('m-qty').value='1'; I('m-hours').value='4';
+}
+function addCon(p) {
+  consumers.push({id:++idCnt,...p,active:true});
+  renderTable(); recalc();
+}
+
+// ── TABLE ───────────────────────────────────────────────────────────
+function renderTable() {
+  const nd = I('no-data'), tbl = I('main-table'), tot = I('totals'), tbody = I('tbody');
+  const vis = catFilter==='all' ? consumers : consumers.filter(c=>c.cat===catFilter);
+  I('con-cnt').textContent = consumers.length;
+  if(!consumers.length){ nd.style.display='';tbl.style.display='none';tot.style.display='none';tbody.innerHTML='';return; }
+  nd.style.display='none';tbl.style.display='';tot.style.display='';
+  const pl = {essential:'🔴',important:'🟡',comfort:'🟢'};
+  const pn = {essential:'Необх.',important:'Важное',comfort:'Комфорт'};
+  tbody.innerHTML = vis.map(c=>{
+    const pm = c.load==='motor'?3:c.load==='charger'?1.2:1;
+    const cur = c.v?(c.power*c.qty)/c.v:0;
+    const pA = cur*pm;
+    const ahd = c.v!==220?(cur*c.hours).toFixed(1):'—';
+    const whd = (c.power*c.qty*c.hours).toFixed(0);
+    const fA = fuse(pA);
+    const cs = pA>30?'cr':pA>15?'hi':'';
+    const vbadge = c.v===220?`<span class="acb">AC</span>`:`<span class="dcb">${c.v}В</span>`;
+    return `<tr data-id="${c.id}" style="opacity:${c.active?1:.45}">
+      <td><div class="toggle ${c.active?'on':''}" onclick="togCon(${c.id})"></div></td>
+      <td><input class="ni" value="${c.name}" onchange="updF(${c.id},'name',this.value)"></td>
+      <td><input class="ci" type="number" value="${c.power}" onchange="updF(${c.id},'power',+this.value)"></td>
+      <td>${vbadge}</td>
+      <td><input class="ci" type="number" value="${c.qty}" min="1" style="width:44px" onchange="updF(${c.id},'qty',+this.value)"></td>
+      <td><input class="ci" type="number" value="${c.hours}" step=".5" style="width:48px" onchange="updF(${c.id},'hours',+this.value)"></td>
+      <td class="mono ${cs}">${pA.toFixed(1)}А</td>
+      <td class="mono">${ahd!=='—'?ahd+' Ач':'—'}</td>
+      <td class="mono">${whd} Вт·ч</td>
+      <td><span class="fbadge">${fA}А</span></td>
+      <td style="font-size:10px;white-space:nowrap">${pl[c.priority]||''} ${pn[c.priority]||''}</td>
+      <td><button class="delbtn" onclick="delCon(${c.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+function updF(id,f,v){const c=consumers.find(x=>x.id===id);if(c){c[f]=v;recalc();renderTable();}}
+function togCon(id){const c=consumers.find(x=>x.id===id);if(c){c.active=!c.active;recalc();renderTable();}}
+function delCon(id){consumers=consumers.filter(x=>x.id!==id);renderTable();recalc();}
+function filterCat(el){
+  document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');catFilter=el.dataset.cat;renderTable();
+}
+
+// ── CALC ─────────────────────────────────────────────────────────────
+function recalc() {
+  const depMap={gel:.5,agm:.5,lifepo4:.8,wet:.5};
+  const batCap=(+I('bat-cap')||0)*(+I('bat-qty')||1);
+  const dep=depMap[I('bat-type').value]||.5;
+  const usable=batCap*dep;
+  const sv=SYS*(+I('bat-series')||1);
+  I('bat-total').textContent=batCap+' Ач';
+  I('bat-usable').textContent=(usable).toFixed(0)+' Ач';
+  I('bat-sv').textContent=sv+' В';
+
+  // Solar
+  const solW=(+I('sol-w')||0)*(+I('sol-n')||0);
+  const solH=+I('sol-h')||0;
+  const solE=parseFloat(I('sol-mppt').value)||.97;
+  const solAh=SYS>0?solW*solH*solE/SYS:0;
+  I('sol-gen').textContent=solAh.toFixed(0)+' Ач/день';
+
+  // Wind
+  const windW=+I('wind-w')||0;
+  const windF=parseFloat(I('wind-sp').value)||.3;
+  const windAh=SYS>0?windW*windF*24/SYS:0;
+  I('wind-gen').textContent=windAh.toFixed(0)+' Ач/день';
+
+  // Gen
+  const genKva=+I('gen-kva')||0;
+  const genH=+I('gen-h')||0;
+  const genE=parseFloat(I('gen-eff').value)||.85;
+  const genAh=SYS>0?genKva*1000*genH*genE/SYS:0;
+  I('gen-ch').textContent=genAh.toFixed(0)+' Ач/день';
+
+  // Shore
+  const shA=+I('shore-a')||0;
+  const shoreAh=shA*0; // not counted unless connected all day — user can set gen hours
+
+  // Consumers
+  const act=consumers.filter(c=>c.active);
+  let dcAhDay=0,acWhDay=0,dcWhDay=0,essAh=0,impAh=0,comAh=0,peakDcA=0,acPeakW=0;
+  act.forEach(c=>{
+    const cur=c.v>0?(c.power*c.qty)/c.v:0;
+    const pm=c.load==='motor'?3:c.load==='charger'?1.2:1;
+    const pA=cur*pm;
+    const wh=c.power*c.qty*c.hours;
+    if(c.v===220){acWhDay+=wh;acPeakW+=c.power*c.qty;}
+    else{const ah=cur*c.hours;dcAhDay+=ah;dcWhDay+=wh;
+      if(c.priority==='essential')essAh+=ah;
+      else if(c.priority==='important')impAh+=ah;
+      else comAh+=ah;
+      peakDcA=Math.max(peakDcA,pA);
+    }
+  });
+
+  const acAh=acWhDay/(SYS*.88);
+  const totalDcAh=dcAhDay+acAh;
+  const avgDcA=totalDcAh/24;
+  const totalChAh=solAh+windAh+genAh;
+  const bal=totalChAh-totalDcAh;
+
+  // Autonomy
+  const autoE=essAh>0?usable/(essAh/24):Infinity;
+  const autoI=(essAh+impAh)>0?usable/((essAh+impAh)/24):Infinity;
+  const autoC=totalDcAh>0?usable/(totalDcAh/24):Infinity;
+
+  I('av-e').textContent=fmtH(autoE); I('bar-e').style.width=barP(autoE)+'%';
+  I('av-i').textContent=fmtH(autoI); I('bar-i').style.width=barP(autoI)+'%';
+  I('av-c').textContent=fmtH(autoC); I('bar-c').style.width=barP(autoC)+'%';
+
+  // SOC
+  let soc=100;
+  if(usable>0){const net=totalChAh-totalDcAh;soc=Math.min(100,Math.max(0,100+(net/usable)*100*dep));}
+  const socEl=I('r-soc'),socFill=I('soc-fill');
+  socEl.textContent=soc.toFixed(0)+'%';
+  socEl.className='rv '+(soc>70?'g':soc>40?'y':'r');
+  socFill.style.width=soc+'%';
+  socFill.style.background=soc>70?'var(--green)':soc>40?'var(--orange)':'var(--red)';
+
+  // Right panel
+  I('r-dc').textContent=totalDcAh.toFixed(1)+' Ач';
+  I('r-ch').textContent=totalChAh.toFixed(1)+' Ач';
+  const balEl=I('r-bal');balEl.textContent=(bal>=0?'+':'')+bal.toFixed(1)+' Ач/день';
+  balEl.className='rv '+(bal>=0?'g':'r');
+  I('r-acw').textContent=acPeakW.toFixed(0)+' Вт';
+  I('r-acwh').textContent=acWhDay.toFixed(0)+' Вт·ч';
+  I('r-inv').textContent=acPeakW>0?invSize(acPeakW)+' Вт':'—';
+  I('r-inv').className='rv '+(acPeakW>0?'s':'');
+  const pkA=I('r-peak');pkA.textContent=peakDcA.toFixed(1)+' А';
+  pkA.className='rv '+(peakDcA>100?'r':peakDcA>50?'y':'c');
+  I('r-cable').textContent=cable(peakDcA);
+  I('r-fuse').textContent=fuse(peakDcA*1.25)+' А';
+
+  // Header
+  I('h-dc').textContent=avgDcA.toFixed(1)+' А';I('h-dc').className='vl '+(avgDcA>20?'warn':'c');
+  I('h-ac').textContent=acPeakW.toFixed(0)+' Вт';I('h-ac').className='vl '+(acPeakW>1500?'warn':'c');
+  I('h-auto').textContent=autoC===Infinity?'∞':autoC.toFixed(1)+' ч';
+  I('h-auto').className='vl '+(autoC<24?'bad':autoC<48?'warn':'ok');
+  // Sync mobile stats
+  I('h-dc-m').textContent=I('h-dc').textContent;I('h-dc-m').className=I('h-dc').className;
+  I('h-ac-m').textContent=I('h-ac').textContent;I('h-ac-m').className=I('h-ac').className;
+  I('h-auto-m').textContent=I('h-auto').textContent;I('h-auto-m').className=I('h-auto').className;
+  I('h-sys-m').textContent=SYS+'В';
+
+  // Totals
+  I('tot-a').textContent=avgDcA.toFixed(2)+' А';
+  I('tot-ah').textContent=totalDcAh.toFixed(1)+' Ач';
+  I('tot-acwh').textContent=acWhDay.toFixed(0)+' Вт·ч';
+  I('tot-wh').textContent=(dcWhDay+acWhDay).toFixed(0)+' Вт·ч';
+
+  // Flow SVG
+  I('fs-solar').textContent=solAh.toFixed(0)+' Ач';
+  I('fs-wind').textContent=windAh.toFixed(0)+' Ач';
+  I('fs-gen').textContent=genAh.toFixed(0)+' Ач';
+  I('fs-shore').textContent=(shA*220/SYS*.85*8).toFixed(0)+' Ач';
+  I('fs-bat').textContent=batCap+' Ач';
+  I('fs-batv').textContent=sv+' В';
+  I('fs-load-a').textContent=avgDcA.toFixed(1)+' А';
+  I('fs-load-w').textContent=(avgDcA*SYS).toFixed(0)+' Вт';
+  const fsbal=I('fs-bal');fsbal.textContent=(bal>=0?'+':'')+bal.toFixed(1)+' Ач';
+  fsbal.setAttribute('fill',bal>=0?'#22c55e':'#ef4444');
+
+  // Boat SVG updates
+  I('bat-node-txt').textContent=batCap+' Ач / '+sv+'В';
+  I('bat-soc-bar').setAttribute('width',(76*(soc/100)).toFixed(1));
+  I('bat-soc-bar').style.fill=soc>70?'rgba(34,197,94,.7)':soc>40?'rgba(249,115,22,.7)':'rgba(239,68,68,.7)';
+  I('boat-soc-label').textContent='АКБ: '+soc.toFixed(0)+'%';
+  // Animate flow lines based on active sources
+  I('fl-solar').style.stroke=solAh>0?'rgba(245,158,11,.5)':'rgba(245,158,11,.0)';
+  I('fl-wind').style.stroke=windAh>0?'rgba(96,165,250,.4)':'rgba(96,165,250,.0)';
+  I('fl-gen').style.stroke=genAh>0?'rgba(249,115,22,.4)':'rgba(249,115,22,.0)';
+  I('fl-bat-panel').style.stroke=totalDcAh>0?'rgba(45,212,191,.4)':'rgba(45,212,191,.15)';
+
+  // Warnings
+  const warns=[];
+  if(autoE<12) warns.push({t:'error',m:`⚡ Автономия по необходимым потребителям ${autoE.toFixed(1)}ч — критически мало!`});
+  if(bal<-20) warns.push({t:'warn',m:`📉 Дефицит ${Math.abs(bal).toFixed(0)} Ач/день — АКБ разряжается каждый день.`});
+  if(peakDcA>150) warns.push({t:'error',m:`🔥 Пиковый ток ${peakDcA.toFixed(0)} А — используйте кабель ≥70 мм².`});
+  if(peakDcA>60&&SYS===12) warns.push({t:'warn',m:`⚙️ При токе>${peakDcA.toFixed(0)}А на 12В рассмотрите 24В систему.`});
+  if(acPeakW>2000) warns.push({t:'warn',m:`⚡ AC нагрузка ${acPeakW.toFixed(0)} Вт — инвертор + генератор/берег.`});
+  if(totalDcAh>usable*.9) warns.push({t:'warn',m:`🔋 Расход близок к доступной ёмкости. Рекомендуется 20% резерв.`});
+  if(bal>10) warns.push({t:'info',m:`✅ Профицит ${bal.toFixed(0)} Ач/день — система самодостаточна.`});
+
+  const wc=I('warns-card'),wl=I('warns-list');wl.innerHTML='';
+  if(!warns.length){wc.style.display='none';return;}
+  wc.style.display='';
+  warns.forEach(w=>{const d=document.createElement('div');d.className='warn-item '+w.t;d.innerHTML=`<span class="wt">${w.m}</span>`;wl.appendChild(d);});
+}
+
+// ── WIRE CALC ────────────────────────────────────────────────────────
+function calcWire(){
+  const I2=+I('w-I').value||0, V=+I('w-V').value||12, L=+I('w-L').value||1, drop=+I('w-drop').value||3;
+  const rho=.0175;
+  const S=(2*L*I2*rho)/((drop/100)*V);
+  const sizes=[.5,.75,1,1.5,2.5,4,6,10,16,25,35,50,70,95,120];
+  const std=sizes.find(s=>s>=S)||120;
+  const fu=fuse(I2);
+  const dV=((2*L*I2*rho)/std).toFixed(3);
+  I('wr-mm').textContent=std+' мм²';
+  I('wr-fuse').textContent=fu+' А';
+  I('wr-note').innerHTML=`Расч. сечение: <b style="color:var(--teal)">${S.toFixed(2)} мм²</b> → стандарт: <b style="color:var(--teal)">${std} мм²</b><br>Падение: <b style="color:var(--sun)">${dV}В (${((+dV/V)*100).toFixed(1)}%)</b> при ${L}м<br>Кабель: луженая медь 2×${std}мм² (морской)`;
+  I('wire-res').style.display='';
+}
+
+// ── PRESETS ──────────────────────────────────────────────────────────
+const PRESETS=[
+  {name:'VHF радио',cat:'comm',power:6,v:12,hours:6,priority:'essential',load:'resistive',qty:1},
+  {name:'GPS/Плоттер',cat:'nav',power:25,v:12,hours:8,priority:'essential',load:'resistive',qty:1},
+  {name:'AIS транспондер',cat:'nav',power:5,v:12,hours:24,priority:'essential',load:'resistive',qty:1},
+  {name:'Навигационные огни',cat:'safety',power:8,v:12,hours:8,priority:'essential',load:'led',qty:1},
+  {name:'Якорный огонь',cat:'safety',power:5,v:12,hours:10,priority:'essential',load:'led',qty:1},
+  {name:'Освещение каюты',cat:'lighting',power:15,v:12,hours:4,priority:'comfort',load:'led',qty:3},
+  {name:'Холодильник',cat:'galley',power:50,v:12,hours:12,priority:'important',load:'motor',qty:1},
+  {name:'Водяная помпа',cat:'bilge',power:60,v:12,hours:.5,priority:'important',load:'motor',qty:1},
+  {name:'Трюмная помпа',cat:'bilge',power:80,v:12,hours:.2,priority:'essential',load:'motor',qty:1},
+  {name:'Автопилот',cat:'nav',power:60,v:12,hours:6,priority:'important',load:'motor',qty:1},
+  {name:'Эхолот',cat:'nav',power:10,v:12,hours:6,priority:'important',load:'resistive',qty:1},
+  {name:'Радар',cat:'nav',power:40,v:12,hours:4,priority:'important',load:'resistive',qty:1},
+  {name:'Якорная лебёдка',cat:'anchor',power:1000,v:12,hours:.05,priority:'important',load:'motor',qty:1},
+  {name:'Кофемашина 220В',cat:'galley',power:1200,v:220,hours:.25,priority:'comfort',load:'resistive',qty:1},
+  {name:'Зарядка ноутбука',cat:'comfort',power:65,v:220,hours:4,priority:'comfort',load:'charger',qty:1},
+  {name:'Starlink/Сатком',cat:'comm',power:100,v:12,hours:8,priority:'comfort',load:'resistive',qty:1},
+  {name:'Подруливатель',cat:'propulsion',power:800,v:12,hours:.05,priority:'comfort',load:'motor',qty:1},
+  {name:'Вентилятор',cat:'comfort',power:25,v:12,hours:8,priority:'comfort',load:'motor',qty:1},
+];
+function initPresets(){
+  const w=I('presets-wrap');
+  PRESETS.forEach(p=>{
+    const b=document.createElement('button');
+    b.className='pbtn';b.textContent=p.name;b.title=`${p.power}Вт/${p.v}В`;
+    b.onclick=()=>addCon({...p});w.appendChild(b);
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+const defaults=[
+  {name:'VHF радио',cat:'comm',power:6,v:12,hours:6,priority:'essential',load:'resistive',qty:1},
+  {name:'GPS/Плоттер',cat:'nav',power:25,v:12,hours:8,priority:'essential',load:'resistive',qty:1},
+  {name:'AIS транспондер',cat:'nav',power:5,v:12,hours:24,priority:'essential',load:'resistive',qty:1},
+  {name:'Навиг. огни LED',cat:'safety',power:8,v:12,hours:8,priority:'essential',load:'led',qty:1},
+  {name:'Освещение каюты',cat:'lighting',power:15,v:12,hours:4,priority:'comfort',load:'led',qty:3},
+  {name:'Холодильник',cat:'galley',power:50,v:12,hours:12,priority:'important',load:'motor',qty:1},
+  {name:'Водяная помпа',cat:'bilge',power:60,v:12,hours:.5,priority:'important',load:'motor',qty:1},
+  {name:'Автопилот',cat:'nav',power:60,v:12,hours:6,priority:'important',load:'motor',qty:1},
+  {name:'Ноутбук 220В',cat:'comfort',power:65,v:220,hours:4,priority:'comfort',load:'charger',qty:1},
+];
+defaults.forEach(d=>{consumers.push({id:++idCnt,...d,active:true});});
+
+initPresets();
+renderTable();
+recalc();
+
+// Modal close
+document.getElementById('addModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.getElementById('wireModal').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('wireModal').classList.remove('open');});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();document.getElementById('wireModal').classList.remove('open');}
+  if(e.key==='Enter'&&document.getElementById('addModal').classList.contains('open'))confirmAdd();
+});
+
+// ── MOBILE TAB NAVIGATION ─────────────────────────────────────────
+function mobTab(tab, btn) {
+  document.querySelector('.panel.left').classList.remove('mob-active');
+  document.querySelector('.center').classList.remove('mob-active');
+  document.querySelector('.panel.right').classList.remove('mob-active');
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(tab==='settings')  document.querySelector('.panel.left').classList.add('mob-active');
+  if(tab==='consumers') document.querySelector('.center').classList.add('mob-active');
+  if(tab==='results')   document.querySelector('.panel.right').classList.add('mob-active');
+  window.scrollTo(0,0);
+}
+
+// Показать первый таб на мобильном при загрузке
+if(window.innerWidth<=768){
+  document.querySelector('.panel.left').classList.add('mob-active');
+}
+</script>
+
+<!-- ─── MOBILE BOTTOM NAV ──────────────────────────────────────────── -->
+<nav class="mob-nav" id="mob-nav">
+  <button class="mnav-btn active" data-tab="settings" onclick="mobTab('settings',this)">
+    <span class="mnav-ico">⚙️</span><span class="mnav-lbl">Настройки</span>
+  </button>
+  <button class="mnav-btn" data-tab="consumers" onclick="mobTab('consumers',this)">
+    <span class="mnav-ico">⚡</span><span class="mnav-lbl">Потребители</span>
+  </button>
+  <button class="mnav-btn" data-tab="results" onclick="mobTab('results',this)">
+    <span class="mnav-ico">📊</span><span class="mnav-lbl">Результаты</span>
+  </button>
+</nav>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Секреты — никогда не коммитим
+.env
+.env.local
+secrets.env
+secrets.json
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
